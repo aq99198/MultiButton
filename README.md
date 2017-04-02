@@ -46,12 +46,14 @@ MultiButton 使用C语言实现，基于面向对象方式设计思路，每个�
 ```
 struct Button {
 	uint16_t ticks;
-	uint8_t  repeat: 4;
+	uint8_t  repeat : 4;
 	uint8_t  event : 4;
 	uint8_t  state : 3;
 	uint8_t  debounce_cnt : 3; 
 	uint8_t  active_level : 1;
 	uint8_t  button_level : 1;
+	uint16_t longTicksVal;  //长按时间设置
+	uint8_t  moreClickVal;  //多次连按触发数
 	uint8_t  (*hal_button_Level)(void);
 	BtnCallback  cb[number_of_event];
 	struct Button* next;
@@ -69,6 +71,7 @@ PRESS_UP | 按键弹起，每次松开都触发
 PRESS_REPEAT | 重复按下触发，变量repeat计数连击次数
 SINGLE_CLICK | 单击按键事件
 DOUBLE_CLICK | 双击按键事件
+MORE_CLICK | 多击按键事件
 LONG_RRESS_START | 达到长按时间阈值时触发一次
 LONG_PRESS_HOLD | 长按期间一直触发
 
@@ -88,12 +91,15 @@ int read_button1_GPIO()
 int main()
 {
 	button_init(&btn1, read_button1_GPIO, 0);
+    	button_resetLongPressTime(&btn1,6000);  //设置6秒响应长按
+    	button_set_clicksCount(&btn1,3);        //设置连按3次，若设置多按，双击就会失效
 	button_attach(&btn1, PRESS_DOWN,       BTN1_PRESS_DOWN_Handler);
 	button_attach(&btn1, PRESS_UP,         BTN1_PRESS_UP_Handler);
 	button_attach(&btn1, PRESS_REPEAT,     BTN1_PRESS_REPEAT_Handler);
 	button_attach(&btn1, SINGLE_CLICK,     BTN1_SINGLE_Click_Handler);
 	button_attach(&btn1, DOUBLE_CLICK,     BTN1_DOUBLE_Click_Handler);
 	button_attach(&btn1, LONG_RRESS_START, BTN1_LONG_RRESS_START_Handler);
+	button_attach(&Btn1, MORE_CLICK,BTN1_PRESS_MOREREPEAT_Handler);
 	button_attach(&btn2, LONG_PRESS_HOLD,  BTN1_LONG_PRESS_HOLD_Handler);
 	button_start(&btn1);
 	

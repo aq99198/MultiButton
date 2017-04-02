@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2016 Zibin Zheng <znbin@qq.com>
- * All rights reserved
- */
- 
 #ifndef _MULTI_BUTTON_H_
 #define _MULTI_BUTTON_H_
 
@@ -24,6 +19,7 @@ typedef enum {
 	PRESS_REPEAT,
 	SINGLE_CLICK,
 	DOUBLE_CLICK,
+	MORE_CLICK,
 	LONG_RRESS_START,
 	LONG_PRESS_HOLD,
 	number_of_event,
@@ -38,6 +34,8 @@ typedef struct Button {
 	uint8_t  debounce_cnt : 3; 
 	uint8_t  active_level : 1;
 	uint8_t  button_level : 1;
+    uint16_t longTicksVal;  //长按时间设置
+    uint8_t  moreClickVal;  //多次连按触发数
 	uint8_t  (*hal_button_Level)(void);
 	BtnCallback  cb[number_of_event];
 	struct Button* next;
@@ -48,6 +46,8 @@ extern "C" {
 #endif  
 
 void button_init(struct Button* handle, uint8_t(*pin_level)(), uint8_t active_level);
+void button_resetLongPressTime(struct Button* handle,uint16_t TimeMsVal);  //重设长按多久触发长按事件
+void button_set_clicksCount(struct Button* handle,uint8_t count);  //设置连按几次触发
 void button_attach(struct Button* handle, PressEvent event, BtnCallback cb);
 PressEvent get_button_event(struct Button* handle);
 int  button_start(struct Button* handle);

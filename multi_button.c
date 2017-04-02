@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2016 Zibin Zheng <znbin@qq.com>
- * All rights reserved
- */
-
 #include "multi_button.h"
 
 #define EVENT_CB(ev)   if(handle->cb[ev])handle->cb[ev]((Button*)handle)
@@ -24,6 +19,33 @@ void button_init(struct Button* handle, uint8_t(*pin_level)(), uint8_t active_le
 	handle->hal_button_Level = pin_level;
 	handle->button_level = handle->hal_button_Level();
 	handle->active_level = active_level;
+    handle->longTicksVal = LONG_TICKS;  //设置默认长按时间
+}
+
+/**
+ * @brief  Reset the button Long press trigger time.
+ * @param  handle: the button handle strcut.
+ * @param  TimeMsVal: Long press trigger time(ms).
+ * @retval None
+ */
+void button_resetLongPressTime(struct Button* handle,uint16_t TimeMsVal)
+{
+    
+    handle->longTicksVal = TimeMsVal / TICKS_INTERVAL;
+}
+
+/**
+ * @brief  set the button clicks count.
+ * @param  handle: the button handle strcut.
+ * @param  count: repeat count.
+ * @retval None
+ */
+void button_set_clicksCount(struct Button* handle,uint8_t count)
+{
+    if(count < 10)  //限制在10次
+    {
+        handle->moreClickVal = count;
+    }
 }
 
 /**
@@ -104,9 +126,13 @@ void button_handler(struct Button* handle)
 			handle->event = (uint8_t)PRESS_DOWN;
 			EVENT_CB(PRESS_DOWN);
 			handle->repeat++;
-			if(handle->repeat == 2) {
-				EVENT_CB(DOUBLE_CLICK); // repeat hit
-			} 
+            if(handle->repeat == handle->moreClickVal)
+            {
+                EVENT_CB(MORE_CLICK);
+            }
+            else if(handle->repeat == 2) {
+                EVENT_CB(DOUBLE_CLICK); // repeat hit
+            }
 			EVENT_CB(PRESS_REPEAT); // repeat hit
 			handle->ticks = 0;
 			handle->state = 3;
