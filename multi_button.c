@@ -114,7 +114,7 @@ void button_handler(struct Button* handle)
 			handle->ticks = 0;
 			handle->state = 2;
 
-		} else if(handle->ticks > LONG_TICKS) {
+		} else if(handle->ticks > handle->longTicksVal) {
 			handle->event = (uint8_t)LONG_RRESS_START;
 			EVENT_CB(LONG_RRESS_START);
 			handle->state = 5;
